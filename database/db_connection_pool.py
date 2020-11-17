@@ -12,11 +12,10 @@ from mysql.connector import Error
 from mysql.connector.connection import MySQLConnection
 from mysql.connector import pooling
 
-import config
-import util
+import settings.config
+import utilities.util as util
 
 try:
-    # Create a JSON file for this data?
     Credentials = util.read_json('settings/mysql_credentials.json')
     
     connection_pool = mysql.pooling.MySQLConnectionPool(pool_name='CRM_pool',
@@ -33,7 +32,6 @@ try:
 except Error as e:
     print("Error while connecting to MySQL using Connection pool ", e)
 
-
 def open_connection():
     connection_object = connection_pool.get_connection()
     
@@ -49,6 +47,4 @@ def close_connection(connection_object, cursor):
         cursor.close()
         connection_object.close()
         print("MySQL connection is closed")
-
-
         

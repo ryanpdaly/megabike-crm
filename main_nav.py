@@ -12,6 +12,9 @@ from tkinter import ttk
 
 from datetime import datetime
 
+import database.db_util
+import warranty.GUIwarranty as rekla
+
 LARGE_FONT = ('Verdana', 12)
 
 class MainNav(tk.Tk):
@@ -27,17 +30,25 @@ class MainNav(tk.Tk):
 		container.title=('Megabike-CRM')
 
 		self.frames = {}
-		
-		frame = NavFrame(container, self)
-		self.frames[NavFrame] = frame
 
-		frame.grid(row=0, column=0, sticky='nsew')
+		WINDOWS_MAIN = (NavFrame, rekla.ViewWarranty)
+
+		for window in WINDOWS_MAIN:
+		
+			frame = window(container, self)
+			self.frames[window] = frame
+
+			frame.grid(row=0, column=0, sticky='nsew')
 
 		self.show_frame(NavFrame)
 
 	def show_frame(self, cont):
 		frame = self.frames[cont]
 		frame.tkraise()
+
+
+	def new_window(self, cont):
+		pass
 
 class NavFrame(tk.Frame):
 	def __init__(self, parent, controller):
@@ -56,17 +67,10 @@ class NavFrame(tk.Frame):
 		insurance_button.grid(column=1, row=1, padx=5, pady=5)
 
 		warranty_button = tk.Button(self, text='Reklamationsbereich',
-									command = '',
+									command = lambda: controller.show_frame(rekla.ViewWarranty),
 									height=5, width=20)
 		warranty_button.grid(column=2, row=1, padx=5, pady=5)
 
-class WarrantyFrame(tk.Frame):
-	def __init__(self, parent, controller):
-		tk.Frame.__init__(self, parent)
-
-class editFrame(tk.Frame):
-	def __init__(self, parent, controller):
-		tk.Frame.__init__(self, parent)
-
 app = MainNav()
+app.title('Megabike CRM')
 app.mainloop()
