@@ -38,17 +38,17 @@ class ScrollableFrame(ttk.Frame):
 		
 		self.canvas = tk.Canvas(self, height=self.height, width=self.width)
 		self.scrollbar = AutoScrollBar(self, orient="vertical", command=self.canvas.yview)
-		self.scrollable_frame = ttk.Frame(self.canvas)
+		self.frame = ttk.Frame(self.canvas)
 		self.bind_frame()
 
 	def bind_frame(self):
-		self.scrollable_frame = ttk.Frame(self.canvas)
-		self.scrollable_frame.bind(
+		self.frame = ttk.Frame(self.canvas)
+		self.frame.bind(
 			"<Configure>",
 			lambda e: self.canvas.configure(scrollregion=self.canvas.bbox('all'))
 			)
 
-		self.canvas.create_window((0,0), window=self.scrollable_frame, anchor='nw')
+		self.canvas.create_window((0,0), window=self.frame, anchor='nw')
 		self.canvas.configure(yscrollcommand=self.scrollbar.set)
 		self.canvas.grid(row=0, column=0)
 		self.scrollbar.grid(row=0, column=1, sticky=tk.NS)
@@ -68,4 +68,4 @@ if __name__ == '__main__':
 	viewFrame = ScrollableFrame()
 
 	for i in range(50):
-		ttk.Label(frame.scrollable_frame)
+		ttk.Label(frame.frame)

@@ -90,11 +90,6 @@ class ViewWarranty(tk.Frame):
 		self.sort_asc.grid(column=6, row=1, sticky='w')
 		self.sort_desc.grid(column=6, row=2, sticky='w')
 
-		# I should probably move this to some sort of menu bar?
-		self.button_settings=tk.Button(self.controlFrame, text='Einstellungen',
-			command='')
-		self.button_settings.grid(column=5, row=2)
-
 		self.navFrame = tk.Frame(self, relief=tk.GROOVE, bd=2)
 		self.navFrame.grid(column=1, row=1, padx=5, pady=5, sticky=tk.E)
 
@@ -141,12 +136,12 @@ class ViewWarranty(tk.Frame):
 		self.result = db_util.commit_query(self.query)
 
 		if not self.result:
-			no_result = tk.Label(self.viewFrame.scrollable_frame,
+			no_result = tk.Label(self.viewFrame.frame,
         		text='Keine Ergebnisse . . . . ', font=('Helvetica',24))
 			no_result.grid()
 
 		else:
-			self.label_filter = tk.Label(self.viewFrame.scrollable_frame,
+			self.label_filter = tk.Label(self.viewFrame.frame,
         		text='Aktuelle Filter: %s' %criteria, font='Helvetica 12 bold')
 			self.label_filter.grid(column=0, row=0, padx=5, pady=3, columnspan=10,
 				sticky='ew')
@@ -164,7 +159,7 @@ class ViewWarranty(tk.Frame):
 						('Update',9,1))
 
 			for label in LABELS:
-				temp_label = tk.Label(self.viewFrame.scrollable_frame, text=label[0],
+				temp_label = tk.Label(self.viewFrame.frame, text=label[0],
 					font=label_font)
 				temp_label.grid(column=label[1], row=label[2])
 
@@ -176,7 +171,7 @@ class ViewWarranty(tk.Frame):
 
 				update_delta = datetime.now() - result[9]
 
-				edit_button = tk.Button(self.viewFrame.scrollable_frame,
+				edit_button = tk.Button(self.viewFrame.frame,
 					text=rep_id, width=10, command=lambda auftrag=rep_id: EditWarranty(self, auftrag))
 				edit_button.grid(row=index, column=num, pady=5)
 
@@ -191,11 +186,11 @@ class ViewWarranty(tk.Frame):
 				for idx, val in enumerate(result):
 					if idx==0 or idx==9:
 						continue
-					lookup_label = tk.Label(self.viewFrame.scrollable_frame,
+					lookup_label = tk.Label(self.viewFrame.frame,
 						text=val)
 					lookup_label.grid(row=index, column=num+1, padx=5, pady=5)
 					num += 1
-				view_status=tk.Button(self.viewFrame.scrollable_frame,
+				view_status=tk.Button(self.viewFrame.frame,
 					text='Stand ändern', width=20,
 					command=lambda auftrag=rep_id: UpdateStatus(self, auftrag))
 				view_status.grid(row=index, column=num+1, padx=2, pady=5)
@@ -335,35 +330,35 @@ class EditWarranty(tk.Toplevel):
 		self.input_vorgangsnr.insert(0, result_info[8])
 
 		# Figure out a way to auto resize the canvas?
-		self.commentsFrame=autoscroll.ScrollableFrame(self, relief=tk.RAISED, height=200, width=750)
+		self.commentsFrame=autoscroll.ScrollableFrame(self, relief=tk.RAISED, borderwidth=10, height=200, width=750)
 		self.commentsFrame.grid(column=0, row=2, pady=10)
 
-		self.label_date=tk.Label(self.commentsFrame.scrollable_frame, 
+		self.label_date=tk.Label(self.commentsFrame.frame, 
 			text='Datum', font=label_font)
 		self.label_date.grid(column=0, row=0, padx=5, pady=3)
 
-		self.label_mitarbeiter=tk.Label(self.commentsFrame.scrollable_frame, 
+		self.label_mitarbeiter=tk.Label(self.commentsFrame.frame, 
 			text='Mitarbeiter', font=label_font)
 		self.label_mitarbeiter.grid(column=1, row=0, padx=5, pady=3)
 
-		self.label_status=tk.Label(self.commentsFrame.scrollable_frame,
+		self.label_status=tk.Label(self.commentsFrame.frame,
 			text='Status', font=label_font)
 		self.label_status.grid(column=2, row=0, padx=5, pady=3)
 
-		self.label_comment=tk.Label(self.commentsFrame.scrollable_frame,
+		self.label_comment=tk.Label(self.commentsFrame.frame,
 			text='Anmerkung', font=label_font)
 		self.label_comment.grid(column=3, row=0, padx=5, pady=3)
 
 		# The view order needs to be reversed, should display newest up top
 		num=len(result_status)
 		for i, x in enumerate(result_status):
-			date=tk.Label(self.commentsFrame.scrollable_frame, text=x[5])
+			date=tk.Label(self.commentsFrame.frame, text=x[5])
 			date.grid(column=0, row=num, padx=5, pady=3)
-			mitarbeiter=tk.Label(self.commentsFrame.scrollable_frame, text=x[1])
+			mitarbeiter=tk.Label(self.commentsFrame.frame, text=x[1])
 			mitarbeiter.grid(column=1, row=num, padx=5, pady=3)
-			status=tk.Label(self.commentsFrame.scrollable_frame, text=x[3])
+			status=tk.Label(self.commentsFrame.frame, text=x[3])
 			status.grid(column=2, row=num, padx=5, pady=3)
-			anmerkung=tk.Text(self.commentsFrame.scrollable_frame, wrap=tk.WORD, width=50,
+			anmerkung=tk.Text(self.commentsFrame.frame, wrap=tk.WORD, width=50,
 				height=5)
 			anmerkung.insert(tk.END, x[4])
 			anmerkung.grid(column=3, row=num, padx=5, pady=3)
@@ -484,16 +479,16 @@ class UpdateStatus(tk.Toplevel):
 		num=len(self.status_list)
 		for i, x in enumerate(self.status_list):
 			i+=2
-			date=tk.Label(self.commentsFrame.scrollable_frame, text=x[5])
+			date=tk.Label(self.commentsFrame.frame, text=x[5])
 			date.grid(column=0, row=num, padx=5, pady=3)
 
-			mitarbeiter=tk.Label(self.commentsFrame.scrollable_frame, text=x[1])
+			mitarbeiter=tk.Label(self.commentsFrame.frame, text=x[1])
 			mitarbeiter.grid(column=1, row=num, padx=5, pady=3)
 
-			status=tk.Label(self.commentsFrame.scrollable_frame, text=x[3])
+			status=tk.Label(self.commentsFrame.frame, text=x[3])
 			status.grid(column=2, row=num, padx=5, pady=3)
 
-			anmerkung=tk.Text(self.commentsFrame.scrollable_frame, wrap=tk.WORD,
+			anmerkung=tk.Text(self.commentsFrame.frame, wrap=tk.WORD,
 				width=53, height=5)
 			anmerkung.insert(tk.END, x[4])
 			anmerkung.grid(column=3, row=num, padx=5, pady=3)

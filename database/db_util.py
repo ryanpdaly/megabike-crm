@@ -49,7 +49,6 @@ class ConnectionPool(mysql.pooling.MySQLConnectionPool):
             connection_object.close()
             print('MySQL connection closed')
 
-
 def check_existence(table, column, criteria):
     command = 'SELECT EXISTS (SELECT * FROM %s WHERE %s = "%s");' %(table, column, criteria)
     check = commit_query(command)
