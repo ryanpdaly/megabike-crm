@@ -16,7 +16,7 @@ import settings.config
 import utilities.util as util
 
 try:
-    Credentials = util.read_json('settings/mysql_credentials.json')
+    Credentials = util.read_json('settings/config_database.json')
     
     connection_pool = mysql.pooling.MySQLConnectionPool(pool_name='CRM_pool',
                                                         pool_size=5,

@@ -8,6 +8,8 @@ Created on Thu Sep  3 07:28:55 2020
 import csv
 import json
 
+import tkinter as tk
+
 def configure_list(file):
     with open(file, mode='r') as infile:
         reader = csv.reader(infile)
@@ -19,8 +21,17 @@ def configure_list(file):
             
     return temp_dict
 
-def error():
-    pass
+class Error(tk.Toplevel):
+    def __init__(self, parent, cause):
+        tk.Toplevel.__init__(self)
+
+        if cause == 'empty_input':
+            err_label=tk.Label(self, text='Bitte alle Eingabefelder ausfüllen',
+                font=config.Settings.headerfont)
+            err_label.pack()
+
+        print('The error function works')
+        self.mainloop()
 
 def read_json(file):
     with open(file, 'r') as read_file:

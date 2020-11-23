@@ -27,7 +27,7 @@ class AutoScrollBar(tk.Scrollbar):
     def place(self, **kw):
         raise tk.TclError("cannot use place with this widget")
 
-class ScrollableFrame(ttk.Frame):
+class ScrollableFrame(tk.Frame):
 	def __init__(self, container, height, width, *args, **kwargs):
 		super().__init__(container, *args, **kwargs)
 		#self.viewFrame = tk.Tk()
