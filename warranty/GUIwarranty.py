@@ -13,6 +13,7 @@ from datetime import datetime
 import tkinter as tk
 from tkinter import ttk
 import tkcalendar as tkcal
+from tkinter import messagebox
 
 import utilities.util as util
 import database.db_util as db_util
@@ -210,10 +211,10 @@ class ViewWarranty(tk.Frame):
 					font=config.settings.labelfont, width=15,
 					command=lambda auftrag=rep_id: UpdateStatus(self, auftrag))
 				view_status.grid(row=index, column=num+1, padx=2, pady=5)
-
+	
 	def create_warranty(self):
 		self.app = EditWarranty(self)
-
+	
 	def refresh_view(self):
 		self.filter_by(self.criteria, self.selection)
 
@@ -360,7 +361,7 @@ class EditWarranty(tk.Toplevel):
 		self.input_vorgangsnr.insert(0, result_info[8])
 
 		# Figure out a way to auto resize the canvas?
-		self.commentsFrame=autoscroll.ScrollableFrame(self, relief=tk.RAISED, borderwidth=10, height=200, width=750)
+		self.commentsFrame=autoscroll.ScrollableFrame(self, relief=tk.RAISED, borderwidth=3, height=200, width=750)
 		self.commentsFrame.grid(column=0, row=2, pady=10)
 
 		self.label_date=tk.Label(self.commentsFrame.frame, 
@@ -379,7 +380,6 @@ class EditWarranty(tk.Toplevel):
 			text='Anmerkung', font=config.Settings.labelfont)
 		self.label_comment.grid(column=3, row=0, padx=5, pady=3)
 
-		# The view order needs to be reversed, should display newest up top
 		num=len(result_status)
 		for i, x in enumerate(result_status):
 			date=tk.Label(self.commentsFrame.frame, text=x[5], 
@@ -428,6 +428,8 @@ class EditWarranty(tk.Toplevel):
 		status_values=(self.input_mitarbeiter.get(), self.input_auftrag.get(), 
 			self.input_status.get(), self.input_anmerkung.get(1.0, tk.END))
 
+
+
 		if db_util.check_existence('rekla', 'auftrag', self.input_auftrag.get()) == 0:
 			db_util.commit_entry(info_command, info_values)
 			db_util.commit_entry(status_command, status_values)
@@ -437,6 +439,10 @@ class EditWarranty(tk.Toplevel):
 			print("Something went wrong, man")
 
 	def edit_rekla(self):
+		if self.input_mitarbeiter.get() == 'Mitarbeiter . . . . ':
+			err_window=messagebox.showerror(title='Mitarbeiter leer', message='Bitte Mitarbeiter eingeben')
+			return()
+
 		info_command="UPDATE rekla SET angenommen=%s, ansprechpartner=%s, \
 			kunde=%s, kd_nr=%s, hersteller=%s, gemeldet=%s, vorgangsnr=%s \
 			WHERE auftrag=%s" 

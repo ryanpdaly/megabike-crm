@@ -42,7 +42,6 @@ def open_connection():
     return connection_object
 
 def close_connection(connection_object, cursor):
-    #closing database connection
     if(connection_object.is_connected()):
         cursor.close()
         connection_object.close()

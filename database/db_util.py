@@ -56,9 +56,11 @@ def check_existence(table, column, criteria):
 
 def commit_entry(sql_command, values):
     connection_object = db_pool.open_connection()
+
     cursor = connection_object.cursor()
     cursor.execute(sql_command, values)
     connection_object.commit()
+
     db_pool.close_connection(connection_object, cursor)
     
 def commit_query(query):

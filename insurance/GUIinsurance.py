@@ -12,7 +12,9 @@ from datetime import date
 import tkcalendar as tkcal
 import tkinter as tk
 from tkinter import ttk
+from tkinter import messagebox
 
+import utilities.util as util
 import utilities.autoscroll as autoscroll
 import settings.config as config
 import database.db_util as db_util
@@ -232,7 +234,7 @@ class Assona(tk.Frame):
 		self.input_vertragsnr=tk.Entry(self.inputFrame, font=config.Settings.labelfont)
 		self.input_vertragsnr.grid(column=1, row=3)
 
-		self.input_beginn=tkcal.DateEntry(self.inputFrame, date_pattern='dd.mm.yyyy', 
+		self.input_beginn=util.DateEntry(self.inputFrame, date_pattern='dd.mm.yyyy', 
 			locale='de_DE', font=config.Settings.labelfont)
 		self.input_beginn.delete(0, tk.END)
 		self.input_beginn.grid(column=1, row=4)
@@ -246,12 +248,11 @@ class Assona(tk.Frame):
 		self.button_reset.grid(column=0, row=0, padx=5, sticky=tk.EW)
 		
 		self.button_save=tk.Button(self.controlFrame, text='Speichern', font=config.Settings.headerfont,
-			command=lambda: self.check_inputs())
+			command=lambda: self.save())
 		self.button_save.grid(column=1, row=0, padx=5, sticky=tk.EW)
 
-	def check_inputs(self):
-		INPUTS = (self.input_kdnr, self.input_bike, self.input_rahmennr, self.input_vertragsnr)
-		#TODO: check that the inputs are all filled out, otherwise do not save.
+		self.INPUTS = (self.input_kdnr, self.input_bike, self.input_rahmennr, self.input_vertragsnr)
+		self.DATES = (self.input_beginn,)
 
 	def fill_inputs(self):
 		to_destroy=(self.input_kdnr, self.input_bike, self.input_rahmennr, 
@@ -278,11 +279,10 @@ class Assona(tk.Frame):
 		self.beginn=result[0][1]
 
 	def reset_inputs(self):
-		self.input_kdnr.delete(0, tk.END)
-		self.input_bike.delete(0, tk.END)
-		self.input_rahmennr.delete(0, tk.END)
-		self.input_vertragsnr.delete(0, tk.END)
-		self.input_beginn.set_date(date.today())
+		for input_ in self.INPUTS:
+			input_.delete(0, tk.END)
+		for date in self.DATES:
+			date.delete(0, tk.END)
 
 	def save(self):
 		all_command="INSERT INTO vers_all (kdnr, fahrrad, rahmennr, versicherung) \
@@ -294,13 +294,15 @@ class Assona(tk.Frame):
 		anbieter_values=(self.input_vertragsnr.get(), self.input_rahmennr.get(),
 			self.input_beginn.get_date())
 
-		try:
-			db_util.commit_entry(all_command, all_values)
-			db_util.commit_entry(anbieter_command, anbieter_values)
-			self.reset_inputs()
-		except:
-			print("Failed to save Assona")
-
+		if util.check_inputs(self.INPUTS, self.DATES):
+			try:
+				db_util.commit_entry(all_command, all_values)
+				db_util.commit_entry(anbieter_command, anbieter_values)
+				self.reset_inputs()
+			except:
+				print("Failed to save Assona")
+		else:
+			err_window=messagebox.showerror(title='Eingabefeld leer', message='Alle Felder sind erforderlich!')
 
 class BikeleasingService(tk.Frame):
 	def __init__(self, parent):
@@ -344,8 +346,9 @@ class BikeleasingService(tk.Frame):
 		self.input_bank=tk.Entry(self.inputFrame, font=config.Settings.labelfont)
 		self.input_bank.grid(column=1, row=5)
 
-		self.input_beginn=tkcal.DateEntry(self.inputFrame, date_pattern='dd.mm.yyyy', 
+		self.input_beginn=util.DateEntry(self.inputFrame, date_pattern='dd.mm.yyyy', 
 			locale='de_DE', font=config.Settings.labelfont)
+		self.input_beginn.delete(0, tk.END)
 		self.input_beginn.grid(column=1, row=6)
 
 		self.controlFrame=tk.Frame(self)
@@ -359,6 +362,10 @@ class BikeleasingService(tk.Frame):
 		self.button_save=tk.Button(self.controlFrame, text='Speichern', 
 			command=lambda: self.save(), font=config.Settings.headerfont)
 		self.button_save.grid(column=1, row=0, padx=5, sticky=tk.EW)		
+
+		self.INPUTS = (self.input_kdnr, self.input_bike, self.input_rahmennr, self.input_nutzerid, 
+			self.input_paket, self.input_bank)
+		self.DATES = (self.input_beginn,)
 
 	def fill_inputs(self):
 		to_destroy=(self.input_kdnr, self.input_bike, self.input_rahmennr, self.input_nutzerid, 
@@ -390,13 +397,10 @@ class BikeleasingService(tk.Frame):
 		self.beginn=result[0][3]
 
 	def reset_inputs(self):
-		self.input_kdnr.delete(0, tk.END)
-		self.input_bike.delete(0, tk.END)
-		self.input_rahmennr.delete(0, tk.END)
-		self.input_nutzerid.delete(0, tk.END)
-		self.input_paket.delete(0, tk.END)
-		self.input_bank.delete(0, tk.END)
-		self.input_beginn.set_date(date.today())
+		for input_ in self.INPUTS:
+			input_.delete(0, tk.END)
+		for date in self.DATES:
+			date.delete(0, tk.END)
 
 	def save(self):
 		all_command="INSERT INTO vers_all (kdnr, fahrrad, rahmennr, versicherung) \
@@ -409,12 +413,15 @@ class BikeleasingService(tk.Frame):
 			self.input_paket.get(), self.input_bank.get(), 
 			self.input_beginn.get_date())
 
-		try:
-			db_util.commit_entry(all_command, all_values)
-			db_util.commit_entry(anbieter_command, anbieter_values)
-			self.reset_inputs()
-		except:
-			print("Failed to save Bikeleasing")
+		if util.check_inputs(self.INPUTS, self.DATES):
+			try:
+				db_util.commit_entry(all_command, all_values)
+				db_util.commit_entry(anbieter_command, anbieter_values)
+				self.reset_inputs()
+			except:
+				print("Failed to save Bikeleasing Service Info")
+		else:
+			err_window=messagebox.showerror(title='Eingabefeld leer', message='Alle Felder sind erforderlich!')
 
 class Businessbike(tk.Frame):
 	def __init__(self, parent):
@@ -452,13 +459,15 @@ class Businessbike(tk.Frame):
 		self.input_rahmennr=tk.Entry(self.inputFrame, font=config.Settings.labelfont, width=25)
 		self.input_rahmennr.grid(column=1, row=3, columnspan=3, padx=2, pady=5)
 
-		self.input_beginn=tkcal.DateEntry(self.inputFrame, date_pattern='dd.mm.yyyy', locale='de_DE',
+		self.input_beginn=util.DateEntry(self.inputFrame, date_pattern='dd.mm.yyyy', locale='de_DE',
 			font=config.Settings.labelfont, width=8)
+		self.input_beginn.delete(0, tk.END)
 		self.input_beginn.grid(column=1, row=4, padx=0, pady=5)
 		self.label_bis=tk.Label(self.inputFrame, text='bis', font=config.Settings.labelfont)
 		self.label_bis.grid(column=2, row=4, padx=2, pady=5)
-		self.input_ende=tkcal.DateEntry(self.inputFrame, date_pattern='dd.mm.yyy', locale='de_DE',
+		self.input_ende=util.DateEntry(self.inputFrame, date_pattern='dd.mm.yyy', locale='de_DE',
 			font=config.Settings.labelfont, width=8)
+		self.input_ende.delete(0, tk.END)
 		self.input_ende.grid(column=3, row=4, padx=0, pady=5)
 
 		self.input_policenr=tk.Entry(self.inputFrame, font=config.Settings.labelfont, width=25)
@@ -478,6 +487,10 @@ class Businessbike(tk.Frame):
 		self.button_save=tk.Button(self.controlFrame, text='Speichern', 
 			command=lambda: self.save(), font=config.Settings.headerfont)
 		self.button_save.grid(column=1, row=0, padx=5, sticky=tk.EW)
+
+		self.INPUTS = (self.input_kdnr, self.input_nutzer, self.input_bike, self.input_rahmennr, 
+			self.input_policenr, self.input_paket)
+		self.DATES = (self.input_beginn, self.input_ende)		
 
 	def fill_inputs(self):
 		to_destroy=(self.input_kdnr, self.input_nutzer, self.input_bike, self.input_rahmennr, 
@@ -512,14 +525,10 @@ class Businessbike(tk.Frame):
 		self.ende=result[0][4]
 
 	def reset_inputs(self):
-		self.input_kdnr.delete(0, tk.END)
-		self.input_nutzer.delete(0, tk.END)
-		self.input_bike.delete(0, tk.END)
-		self.input_rahmennr.delete(0, tk.END)
-		self.input_beginn.set_date(date.today())
-		self.input_ende.set_date(date.today())
-		self.input_policenr.delete(0, tk.END)
-		self.input_paket.delete(0, tk.END)
+		for input_ in self.INPUTS:
+			input_.delete(0, tk.END)
+		for date in self.DATES:
+			date.delete(0, tk.END)
 
 	def save(self):
 		all_command="INSERT INTO vers_all (kdnr, fahrrad, rahmennr, versicherung) \
@@ -532,12 +541,15 @@ class Businessbike(tk.Frame):
 			self.input_paket.get(), self.input_nutzer.get(), 
 			self.input_beginn.get_date(), self.input_ende.get_date())
 
-		try:
-			db_util.commit_entry(all_command, all_values)
-			db_util.commit_entry(anbieter_command, anbieter_values)
-			self.reset_inputs()
-		except:
-			print("Failed to save Businessbike")
+		if util.check_inputs(self.INPUTS, self.DATES):
+			try:
+				db_util.commit_entry(all_command, all_values)
+				db_util.commit_entry(anbieter_command, anbieter_values)
+				self.reset_inputs()
+			except Error as e:
+				err_window=messagebox.showerror(title='Error', message='Businessbike Versicherungsinfo könnte nicht gespeichert werden.')
+		else:
+			err_window=messagebox.showerror(title='Eingabefeld leer', message='Alle Felder sind erforderlich!')
 
 class ENRA(tk.Frame):
 	def __init__(self, parent):
@@ -574,8 +586,9 @@ class ENRA(tk.Frame):
 		self.input_rahmennr=tk.Entry(self.inputFrame, font=config.Settings.labelfont)
 		self.input_rahmennr.grid(column=1, row=3, padx=2, pady=5)
 
-		self.input_beginn=tkcal.DateEntry(self.inputFrame, date_pattern='dd.mm.yyyy', 
+		self.input_beginn=util.DateEntry(self.inputFrame, date_pattern='dd.mm.yyyy', 
 			locale='de_DE', font=config.Settings.labelfont)
+		self.input_beginn.delete(0, tk.END)
 		self.input_beginn.grid(column=1, row=4, padx=2, pady=5)
 
 		self.input_policenr=tk.Entry(self.inputFrame, font=config.Settings.labelfont)
@@ -591,7 +604,11 @@ class ENRA(tk.Frame):
 		
 		self.button_save=tk.Button(self.controlFrame, text='Speichern', 
 			command=lambda: self.save(), font=config.Settings.headerfont)
-		self.button_save.grid(column=1, row=0, padx=5, sticky=tk.EW)	
+		self.button_save.grid(column=1, row=0, padx=5, sticky=tk.EW)
+
+		self.INPUTS = (self.input_kdnr, self.input_nutzer, self.input_bike, self.input_rahmennr,
+			self.input_policenr)
+		self.DATES = (self.input_beginn,)		
 
 	def fill_inputs(self):
 		to_destroy=(self.input_kdnr, self.input_nutzer, self.input_bike,
@@ -623,12 +640,10 @@ class ENRA(tk.Frame):
 		self.beginn=result[0][2]
 
 	def reset_inputs(self):
-		self.input_kdnr.delete(0, tk.END)
-		self.input_nutzer.delete(0, tk.END)
-		self.input_bike.delete(0, tk.END)
-		self.input_rahmennr.delete(0, tk.END)
-		self.input_beginn.set_date(date.today())
-		self.input_policenr.delete(0, tk.END)
+		for input_ in self.INPUTS:
+			input_.delete(0, tk.END)
+		for date in self.DATES:
+			date.delete(0, tk.END)
 
 	def save(self):
 		all_command="INSERT INTO vers_all (kdnr, fahrrad, rahmennr, versicherung) \
@@ -640,12 +655,15 @@ class ENRA(tk.Frame):
 		anbieter_values=(self.input_rahmennr.get(), self.input_policenr.get(),
 			self.input_nutzer.get(), self.input_beginn.get_date())
 
-		try:
-			db_util.commit_entry(all_command, all_values)
-			db_util.commit_entry(anbieter_command, anbieter_values)
-			self.reset_inputs()
-		except:
-			print("Failed to save ENRA")
+		if util.check_inputs(self.INPUTS, self.DATES):
+			try:
+				db_util.commit_entry(all_command, all_values)
+				db_util.commit_entry(anbieter_command, anbieter_values)
+				self.reset_inputs()
+			except:
+				print("Failed to save ENRA Versicherungsinfo")
+		else:
+			err_window=messagebox.showerror(title='Eingabefeld leer', message='Alle Felder sind erforderlich!')
 
 class EuroRad(tk.Frame):
 	def __init__(self, parent):
@@ -681,8 +699,9 @@ class EuroRad(tk.Frame):
 		self.input_vertragsnr=tk.Entry(self.inputFrame, font=config.Settings.labelfont)
 		self.input_vertragsnr.grid(column=1, row=3)
 
-		self.input_beginn=tkcal.DateEntry(self.inputFrame, date_pattern='dd.mm.yyyy', 
+		self.input_beginn=util.DateEntry(self.inputFrame, date_pattern='dd.mm.yyyy', 
 			locale='de_DE', font=config.Settings.labelfont)
+		self.input_beginn.delete(0, tk.END)
 		self.input_beginn.grid(column=1, row=4)
 
 		self.controlFrame=tk.Frame(self)
@@ -696,6 +715,9 @@ class EuroRad(tk.Frame):
 		self.button_save=tk.Button(self.controlFrame, text='Speichern', 
 			command=lambda: self.save(), font=config.Settings.headerfont)
 		self.button_save.grid(column=1, row=0, padx=5, sticky=tk.EW)
+
+		self.INPUTS = (self.input_kdnr, self.input_fahrrad, self.input_rahmennr, self.input_vertragsnr)
+		self.DATES = (self.input_beginn,)		
 
 	def fill_inputs(self):
 		to_destroy=(self.input_kdnr, self.input_fahrrad, self.input_rahmennr, 
@@ -723,11 +745,10 @@ class EuroRad(tk.Frame):
 		self.beginn=result[0][1]
 
 	def reset_inputs(self):
-		self.input_kdnr.delete(0, tk.END)
-		self.input_fahrrad.delete(0, tk.END)
-		self.input_rahmennr.delete(0, tk.END)
-		self.input_vertragsnr.delete(0, tk.END)
-		self.input_beginn.set_date(date.today())
+		for input_ in self.INPUTS:
+			input_.delete(0, tk.END)
+		for date in self.DATES:
+			date.delete(0, tk.END)
 
 	def save(self):
 		all_command="INSERT INTO vers_all (kdnr, fahrrad, rahmennr, versicherung) \
@@ -739,12 +760,15 @@ class EuroRad(tk.Frame):
 		anbieter_values=(self.input_rahmennr.get(), self.input_vertragsnr.get(),
 			self.input_beginn.get_date())
 
-		try:
-			db_util.commit_entry(all_command, all_values)
-			db_util.commit_entry(anbieter_command, anbieter_values)
-			self.reset_inputs()
-		except:
-			print("Failed to save EuroRad")
+		if util.check_inputs(self.INPUTS, self.DATES):
+			try:
+				db_util.commit_entry(all_command, all_values)
+				db_util.commit_entry(anbieter_command, anbieter_values)
+				self.reset_inputs()
+			except:
+				print("Failed to save EuroRad Versicherungsinfo")
+		else:
+			err_window=messagebox.showerror(title='Eingabefeld leer', message='Alle Felder sind erforderlich!')
 
 class JobRad(tk.Frame):
 	def __init__(self, parent):

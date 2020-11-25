@@ -12,7 +12,6 @@ from tkinter import ttk
 
 from datetime import datetime
 
-import database.db_util
 import warranty.GUIwarranty as rekla
 import insurance.GUIinsurance as vers
 import settings.config as config
@@ -41,9 +40,6 @@ class MainNav(tk.Tk):
 	def show_frame(self, cont):
 		frame = self.frames[cont]
 		frame.tkraise()
-
-	def new_window(self, cont):
-		pass
 
 class NavFrame(tk.Frame):
 	def __init__(self, parent, controller):
